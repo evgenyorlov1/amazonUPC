@@ -37,8 +37,8 @@ public class SignedRequestsHelper {
   private static final String REQUEST_METHOD = "GET";
 
   private String endpoint = "webservices.amazon.com"; // must be lowercase
-  private String awsAccessKeyId = "AKIAJ7EM454QUUFN5FXQ";
-  private String awsSecretKey = "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";
+  private String awsAccessKeyId = "AKIAIFMWLBY2DFLDWRMA";
+  private String awsSecretKey = "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";
   private String AssociateTag = "jufofu050-20"; // https://affiliate-program.amazon.com/gp/associates/apply/main.html                 
 
   private SecretKeySpec secretKeySpec = null;

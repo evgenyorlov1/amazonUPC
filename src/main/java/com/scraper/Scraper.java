@@ -45,7 +45,7 @@ public class Scraper{
     
         
     private final static String url_Ebay = "http://svcs.ebay.com/services/search/FindingService/v1?SECURITY-APPNAME={applicationId}&OPERATION-NAME=findItemsByProduct&SERVICE-VERSION=1.0.0&REST-PAYLOAD&productId.@type=UPC&productId={upc}&paginationInput.entriesPerPage={enteries}";
-    private final static String applicationId = "EvgenyOr-f29a-41ba-9145-05cb5304c582";    
+    private final static String applicationId = "EvgenyOr-f29a-41ba-9145-05cb5304c582";     //EBAY
     private static String url_Amazon;
     private static String enteries = "1";
     private static XSSFWorkbook book ;//= new XSSFWorkbook(); 
@@ -67,32 +67,7 @@ public class Scraper{
             amazonStart(args);            
             ebayStart(args);
         }
-    }
-  
-
-    //public static void main(String args) throws FileNotFoundException {
-        // TODO code application logic here        
-        //upc = "044387286800";
-        //upc = args;
-/*        PrintWriter writer;
-        try {
-            writer = new PrintWriter("the-file-name.txt", "UTF-8");
-            writer.println("The first line");
-            writer.println("The second line");
-            writer.close();
-        } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(Scraper.class.getName()).log(Level.SEVERE, null, ex);
-        }
-*/                
-        //if(args.isEmpty()) {
-            
-        //}
-        //else {            
-        //    out = new FileOutputStream(new File(System.getProperty("user.dir") + File.separator + args+".xlsx"));
-        //    amazonStart(args);
-        //    ebayStart(args);
-        //}
-    //}
+    }     
     
     
     private static void ebayStart(String upcc) {        
@@ -144,12 +119,12 @@ public class Scraper{
         map.put("IdType", "UPC");        
         map.put("SearchIndex", "All");              
         map.put("ItemId", upc); 
-        map.put("ResponseGroup", "Large"); 
+        map.put("ResponseGroup", "Large");         
         
         try {                        
             SignedRequestsHelper signedH = new SignedRequestsHelper();            
-            url_Amazon = signedH.sign(map);  
-            //System.out.println(url_Amazon);
+            url_Amazon = signedH.sign(map);              
+            System.out.println(url_Amazon);
             sendRequest(url_Amazon, flag);            
         } catch (Exception ex) {
             System.err.println("amazonStart exception" + ex);
@@ -174,7 +149,7 @@ public class Scraper{
                     sb.append(line);
                 }
                 rd.close();
-                if(flag) {                    
+                if(flag) {                      
                     amazonParser(sb.toString());                 
                 }
                 else {            
@@ -195,21 +170,82 @@ public class Scraper{
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();        
         try {            
             DocumentBuilder db = dbf.newDocumentBuilder();              
-            Document doc = db.parse(new ByteArrayInputStream(response.getBytes("UTF-8")));                                                            
-            map.put("ASIN", doc.getElementsByTagName("ASIN").item(0).getTextContent());
-            map.put("DetailPageURL", doc.getElementsByTagName("DetailPageURL").item(0).getTextContent());
-            map.put("LargeImage", doc.getElementsByTagName("LargeImage").item(0).getFirstChild().getTextContent());
+            Document doc = db.parse(new ByteArrayInputStream(response.getBytes("UTF-8")));            
             try {
-                map.put("Product description", doc.getElementsByTagName("Content").item(0).getTextContent());
-                map.put("Amazon review", doc.getElementsByTagName("Content").item(1).getTextContent());
-            } catch(Exception e) {
-                System.err.println("Product description error: " + e);
-            }
-            map.put("ItemAttributes", "");            
-            NodeList attributes = doc.getElementsByTagName("ItemAttributes").item(0).getChildNodes();
-            for(int i=0; i < attributes.getLength(); i++) {
-                map.put(attributes.item(i).getNodeName(), attributes.item(i).getTextContent());                                
-            }
+                map.put("Rank", doc.getElementsByTagName("SalesRank").item(0).getTextContent()); //ok
+                System.out.println("SalesRank: " + doc.getElementsByTagName("SalesRank").item(0).getTextContent());
+            } catch(Exception e) {}
+            
+            try {
+                map.put("UPC", doc.getElementsByTagName("UPC").item(0).getTextContent());//ok
+                System.out.println("UPC: " + doc.getElementsByTagName("UPC").item(0).getTextContent());
+            } catch(Exception e) {}
+            
+            try {
+                map.put("SKU", doc.getElementsByTagName("SKU").item(0).getTextContent()); //ok
+                System.out.println("SKU: " + doc.getElementsByTagName("SKU").item(0).getTextContent());
+            } catch(Exception e) {}
+            
+            try {
+                map.put("item-name", doc.getElementsByTagName("Title").item(0).getTextContent()); //ok
+                System.out.println("item-name: " + doc.getElementsByTagName("Title").item(0).getTextContent());
+            } catch(Exception e) {}
+            
+            try {
+                map.put("item-description", doc.getElementsByTagName("Content").item(0).getTextContent()); //ok
+                System.out.println("item-desc: " + doc.getElementsByTagName("Content").item(0).getTextContent());
+            } catch(Exception e) {}
+            
+            try {
+                map.put("price", doc.getElementsByTagName("OfferSummary").item(0).getFirstChild().getChildNodes().item(2).getTextContent());  //ok
+                System.out.println("price: " + doc.getElementsByTagName("OfferSummary").item(0).getFirstChild().getChildNodes().item(2).getTextContent()); 
+            } catch(Exception e) {}                                                                  
+                        
+            try {
+                String features = "";
+                for(int i = 0; i < doc.getElementsByTagName("Feature").getLength(); i++) {
+                    features += doc.getElementsByTagName("Feature").item(i).getTextContent() + ". ";
+                    //map.put("Feature", doc.getElementsByTagName("Feature").item(i).getTextContent());                    
+                }
+                map.put("Feature", features);                
+            } catch(Exception e) {}
+                        
+            try {
+                //map.put("weight", doc.getElementsByTagName("ItemDimensions").item(2).getTextContent());
+                int weight;
+                String weht = doc.getElementsByTagName("PackageDimensions").item(0).getChildNodes().item(2).getTextContent();
+                //weight = Integer.getInteger(doc.getElementsByTagName("PackageDimensions").item(0).getChildNodes().item(2).getTextContent());
+                System.out.println(Integer.getInteger(weht));
+            } catch(Exception e) { System.out.println("bad");}
+            
+            
+            
+            
+            
+            
+            
+            try {
+                map.put("height", doc.getElementsByTagName("ItemDimensions").item(0).getTextContent());
+                System.out.println();
+            } catch(Exception e) {}
+            
+            try {
+                map.put("Length", doc.getElementsByTagName("ItemDimensions").item(1).getTextContent());
+                System.out.println();
+            } catch(Exception e) {}
+            
+            try {
+                map.put("Width", doc.getElementsByTagName("ItemDimensions").item(3).getTextContent());
+                System.out.println();
+            } catch(Exception e) {}
+            
+            try {
+                map.put("image-url", doc.getElementsByTagName("LargeImage").item(0).getFirstChild().getTextContent());            
+                System.out.println();
+            } catch(Exception e) {}
+            
+            //map.put("DetailPageURL", doc.getElementsByTagName("DetailPageURL").item(0).getTextContent());                        
+            
             map.put("LowestNewPrice", "");            
             NodeList amazonOutputt =  doc.getElementsByTagName("LowestNewPrice").item(0).getChildNodes();            
             for(int i=0; i < amazonOutputt.getLength(); i++) {
