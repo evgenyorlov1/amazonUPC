@@ -130,15 +130,14 @@ public class gui extends javax.swing.JFrame {
         // TODO add your handling code here:
         JFileChooser fileopen = new JFileChooser();             
         int ret = fileopen.showDialog(null, "Open File");                
-        if (ret == JFileChooser.APPROVE_OPTION) {
+        if (ret == JFileChooser.APPROVE_OPTION) {            
             File file = fileopen.getSelectedFile();                       
             try {
                 String line = "";
                 BufferedReader br = new BufferedReader(new FileReader(file));
-                while((line = br.readLine()) != null) {
-                    //line.replaceAll("\\s+", "");
-                    //System.out.println(line + "+");
+                while((line = br.readLine()) != null) {                    
                     Scraper scr = new Scraper();
+                    line.replaceAll("\\s+",""); //replaces whitespaces from String
                     scr.craper(line);
                 }
             } catch(Exception e) {
