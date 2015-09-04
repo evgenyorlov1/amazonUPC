@@ -18,9 +18,11 @@ public class Amazon {
     
     private Map map = new HashMap<String, String>();
     private Map imageSet = new HashMap<String, String>();
+    private String upsGlobal;
     
     
     public Amazon(String upc) {
+        upsGlobal = upc;
         String url_Amazon = "";
         Map map = new HashMap<String, String>();
         
@@ -79,7 +81,7 @@ public class Amazon {
             try {
                 doc.getElementsByTagName("Errors").item(0).getTextContent();
                 map.put("Rank", "");
-                map.put("UPC", "");
+                map.put("UPC", upsGlobal);
                 map.put("SKU", "");
                 map.put("item-name", "");
                 map.put("item-description", "");
@@ -89,9 +91,16 @@ public class Amazon {
                 map.put("Height", "");
                 map.put("Length", "");
                 map.put("Width", "");
+                map.put("Dimensions", "");
+                map.put("Category", "");
+                map.put("Keywords", "");                
+                map.put("Quantity", "");    
                 imageSet.put("image-url", "");
                 imageSet.put("image", "");                                
             } catch(Exception exc) {
+                map.put("Category", "");
+                map.put("Keywords", "");                
+                map.put("Quantity", "");    
                 try {
                     map.put("Rank", doc.getElementsByTagName("SalesRank").item(0).getTextContent()); //ok
                     System.out.println("SalesRank: " + doc.getElementsByTagName("SalesRank").item(0).getTextContent());
@@ -105,7 +114,7 @@ public class Amazon {
                     System.out.println("UPC: " + doc.getElementsByTagName("UPC").item(0).getTextContent());
                 } catch(Exception e) {
                     System.err.println(e + " UPC");
-                    map.put("UPC", "");
+                    map.put("UPC", upsGlobal);
                 }
             
                 try {                                                    
@@ -160,7 +169,7 @@ public class Amazon {
                         
                 try {                                
                     String weht = doc.getElementsByTagName("PackageDimensions").item(0).getChildNodes().item(2).getTextContent();                
-                    map.put("Weight", String.valueOf(Integer.parseInt(weht)/100));  //ok
+                    map.put("Weight", String.valueOf(Float.valueOf(weht)/100));  //ok
                     System.out.println("Weight: " + Float.valueOf(weht)/100);
                 } catch(Exception e) {
                     System.out.println(e + " weight");
@@ -206,7 +215,8 @@ public class Amazon {
             } 
             } catch(Exception e) {                
                 System.err.println("amazonParser exception: " + e);
-            }        
+            }
+        setDimensions();
       
     }
     
@@ -238,5 +248,31 @@ public class Amazon {
         } catch(Exception e) {
             System.out.println("setPrice error: " + e);
         }
+    }
+    
+    
+    private void setDimensions() {
+        try {
+            String dimensions = "";
+            String length = String.valueOf((Float) map.get("Length"));
+            String width = String.valueOf((Float) map.get("Width"));
+            String height = String.valueOf((Float) map.get("Height"));
+        
+            if(length != "" && width != "" && height != "") {
+                dimensions = length + " x " + width + " x " + height;
+                System.out.println("Dimensions: " + dimensions);
+                map.remove("Length");
+                map.remove("Width");
+                map.remove("Height");
+                map.put("Dimensions", dimensions);
+            }
+            else {
+                System.out.println("Dimensions: " + dimensions);
+                map.remove("Length");
+                map.remove("Width");
+                map.remove("Height");
+                map.put("Dimensions", dimensions);
+            }
+        } catch(Exception e ) {System.out.println("SetDimensions error: " + e);}
     }
 }
