@@ -8,7 +8,10 @@ package com.scraper;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -120,7 +123,7 @@ public class gui extends javax.swing.JFrame {
             }
             else {
                 jTextField1.setText("");
-                scraper.craper(upc);
+                Scraper.lineInput(upc); //scraper class for a single String input
             }
             
         } catch(Exception e) {}
@@ -131,18 +134,10 @@ public class gui extends javax.swing.JFrame {
         JFileChooser fileopen = new JFileChooser();             
         int ret = fileopen.showDialog(null, "Open File");                
         if (ret == JFileChooser.APPROVE_OPTION) {            
-            File file = fileopen.getSelectedFile();                       
             try {
-                String line = "";
-                BufferedReader br = new BufferedReader(new FileReader(file));
-                while((line = br.readLine()) != null) {                    
-                    Scraper scr = new Scraper();
-                    line.replaceAll("\\s+",""); //replaces whitespaces from String
-                    scr.craper(line);
-                }
-            } catch(Exception e) {
-                System.err.println("Reading csv error: " + e);
-            }
+                File file = fileopen.getSelectedFile();
+                Scraper.fileInput(file);
+            } catch (FileNotFoundException ex) {}            
         }
     }                                        
 

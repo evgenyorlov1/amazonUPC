@@ -65,16 +65,15 @@ public class Ebay {
             Document doc = db.parse(new ByteArrayInputStream(response.getBytes("UTF-8")));
             if (doc.getElementsByTagName("ack").item(0).getTextContent() != "Failure") {
                     price = doc.getElementsByTagName("convertedCurrentPrice").item(0).getTextContent();
-                    System.out.println(price);
+                    System.out.println("Ebay price(if): " + price);
             } else {
                 price = "";
-                System.out.println(price);
+                System.out.println("Ebay price(else): " + price);
             }
         } catch(Exception e) {
             price ="";
-            System.err.println("Ebay parser exception " + e);
-        }
-
+            System.out.println("Ebay parser exception " + e);
+        }        
     }
     
     

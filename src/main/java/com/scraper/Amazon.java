@@ -8,7 +8,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
@@ -44,7 +43,7 @@ public class Amazon {
     }
     
     
-    protected void sendRequest(String urlRequest) {
+    private void sendRequest(String urlRequest) {
         try {
             URL url = new URL(urlRequest);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -71,7 +70,7 @@ public class Amazon {
     }
     
     
-    protected void parser(String response) {       
+    private void parser(String response) {       
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         
         try {            
@@ -79,6 +78,19 @@ public class Amazon {
             Document doc = db.parse(new ByteArrayInputStream(response.getBytes("UTF-8")));
             try {
                 doc.getElementsByTagName("Errors").item(0).getTextContent();
+                map.put("Rank", "");
+                map.put("UPC", "");
+                map.put("SKU", "");
+                map.put("item-name", "");
+                map.put("item-description", "");
+                map.put("price", "");
+                map.put("Feature", "");
+                map.put("Weight", "");
+                map.put("Height", "");
+                map.put("Length", "");
+                map.put("Width", "");
+                imageSet.put("image-url", "");
+                imageSet.put("image", "");                                
             } catch(Exception exc) {
                 try {
                     map.put("Rank", doc.getElementsByTagName("SalesRank").item(0).getTextContent()); //ok
@@ -194,11 +206,7 @@ public class Amazon {
             } 
             } catch(Exception e) {                
                 System.err.println("amazonParser exception: " + e);
-            }
-        Set <String> keyid = map.keySet();
-        System.out.println(keyid.size());
-        Set <String> keys = imageSet.keySet();
-        System.out.println(keys.size());
+            }        
       
     }
     
@@ -206,7 +214,29 @@ public class Amazon {
     public Map getItem() {
         Map result = new HashMap<String, Map>();
         result.put("features", map);
-        result.put("imagies", map);
+        result.put("imagies", imageSet);
         return result;
+    }
+    
+    
+    public void setPrice(String ePrice) {
+        System.out.println("Ebay price: " + ePrice);
+        System.out.println("Amazon price: " + (String) map.get("price"));
+        String aPrice = (String) map.get("price");
+        try {
+            if(ePrice == "") {System.out.println("ePrice == ''");}  //ok
+            else if(ePrice != "") {
+                if(aPrice == "") {map.put("price", ePrice);}
+                else {
+                    float aprice = Float.valueOf(aPrice.replaceAll("[^0-9.]", ""));
+                    System.out.println("aprice = " + aprice);
+                    float eprice = Float.valueOf(ePrice.replaceAll("[^0-9.]", ""));
+                    System.out.println("eprice = " + eprice);
+                    if(eprice < aprice) {map.put("price", String.valueOf(eprice)); System.out.println("Price changed");System.out.println("Amazon map price: " + map.get("price"));}
+                }
+            }                        
+        } catch(Exception e) {
+            System.out.println("setPrice error: " + e);
+        }
     }
 }
